@@ -1,0 +1,16 @@
+streamlit
+ translate
+ gtts
+ requests
+ Pillow
+ SpeechRecognition
+google-Generativeai
+sentence-transformers
+uvicorn
+ctransformers
+langchain
+python-box
+streamlit
+langchain_community
+huggingface_hub
+pytube
