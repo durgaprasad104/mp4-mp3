@@ -43,7 +43,7 @@ st.set_page_config(page_title="YouTube-Video Transcription",
 st.header("YouTube Video Transcription 🎥")
 
 # Input field for YouTube URL
-video_url = st.text_input("Enter the You-tTube Video URL")
+video_url = st.text_input("Enter the You-Tube Video URL")
 
 # Submit button
 if st.button("Transcribe"):
