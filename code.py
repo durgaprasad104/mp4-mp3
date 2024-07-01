@@ -98,7 +98,8 @@ if st.button("Transcribe", key="transcribe_button", help="Click to transcribe th
 st.markdown("""
     <style>
     .stButton > button {
-        background-color: #4CAF50;
+        background: linear-gradient(45deg, #FF6F61, #FFB399, #FFD700, #32CD32, #87CEEB, #9370DB);
+        background-size: 600% 600%;
         color: white;
         padding: 14px 20px;
         margin: 8px 0;
@@ -106,11 +107,17 @@ st.markdown("""
         cursor: pointer;
         width: 100%;
         opacity: 0.9;
-        transition: 0.3s;
+        transition: all 0.5s ease;
+        animation: gradient 5s ease infinite;
     }
     .stButton > button:hover {
         opacity: 1;
-        background-color: #45a049;
+        transform: scale(1.05);
+    }
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
     </style>
     """, unsafe_allow_html=True)
