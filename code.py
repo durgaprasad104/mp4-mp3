@@ -35,7 +35,7 @@ def transcribe_audio(file):
     return {"error": "Failed to load model after multiple attempts"}
 
 # Streamlit configuration
-st.set_page_config(page_title="YouTube Video Transcription",
+st.set_page_config(page_title="YouTube-Video Transcription",
                    page_icon='🎥',
                    layout='centered',
                    initial_sidebar_state='collapsed')
