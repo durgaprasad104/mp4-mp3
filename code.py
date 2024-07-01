@@ -35,18 +35,38 @@ def transcribe_audio(file):
     return {"error": "Failed to load model after multiple attempts"}
 
 # Streamlit configuration
-st.set_page_config(page_title="YouTube-Video Transcription",
+st.set_page_config(page_title="YouTube Video Transcription",
                    page_icon='🎥',
                    layout='centered',
-                   initial_sidebar_state='collapsed')
+                   initial_sidebar_state='expanded')
+
+# Sidebar configuration
+st.sidebar.title("About the App")
+st.sidebar.info(
+    """
+    This app allows you to transcribe the audio of a YouTube video using the Whisper model.
+    - Enter the YouTube video URL
+    - Download the audio
+    - Transcribe the audio to text
+
+    **Note:** The transcription process may take some time depending on the length of the audio and server load.
+    """
+)
+
+st.sidebar.title("Contact")
+st.sidebar.info(
+    """
+    **Developed by DP**
+    """
+)
 
 st.header("YouTube Video Transcription 🎥")
 
 # Input field for YouTube URL
-video_url = st.text_input("Enter the You-Tube Video URL")
+video_url = st.text_input("Enter the YouTube Video URL")
 
 # Submit button
-if st.button("Transcribe"):
+if st.button("Transcribe", key="transcribe_button", help="Click to transcribe the YouTube video"):
     if video_url:
         try:
             st.write("Downloading audio...")
@@ -73,3 +93,24 @@ if st.button("Transcribe"):
             st.write(f"An error occurred: {e}")
     else:
         st.write("Please enter a valid YouTube URL")
+
+# Add CSS for styling buttons
+st.markdown("""
+    <style>
+    .stButton > button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        opacity: 0.9;
+        transition: 0.3s;
+    }
+    .stButton > button:hover {
+        opacity: 1;
+        background-color: #45a049;
+    }
+    </style>
+    """, unsafe_allow_html=True)
