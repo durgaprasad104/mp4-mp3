@@ -1,8 +1,6 @@
 import streamlit as st
-import requests
 from pytube import YouTube
 import os
-import time
 
 # Function to download audio from YouTube video
 def download_audio_from_youtube(video_url, output_path="audio.mp4"):
@@ -44,7 +42,7 @@ user_name = st.text_input("Enter your name", help="Please enter your name to con
 
 # Check if user name is entered
 if user_name:
-    st.sidebar.title(f"Welcome {user_name}!")
+    st.sidebar.title(f"Welcome {user_name}!")  # Display user's name in the sidebar
     st.sidebar.info(
         """
         This app allows you to download the audio or video of a YouTube video.
