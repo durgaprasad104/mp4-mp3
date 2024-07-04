@@ -12,11 +12,19 @@ def download_audio_from_youtube(video_url, output_path="audio.mp4"):
     return output_path
 
 # Function to download video from YouTube
-def download_video_from_youtube(video_url, output_path="video.mp4"):
+def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     yt = YouTube(video_url)
-    video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
-    video_stream.download(filename=output_path)
-    return output_path
+    
+    if quality == 'Low':
+        video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').asc().first()
+    elif quality == 'High (1080p)':
+        video_stream = yt.streams.filter(progressive=True, file_extension='mp4', res="1080p").first()
+    
+    if video_stream:
+        video_stream.download(filename=output_path)
+        return output_path
+    else:
+        return None
 
 # Function to transcribe audio using Whisper model
 def transcribe_audio(file):
@@ -72,20 +80,29 @@ st.header("YouTube Video Transcription 🎥")
 # Input field for YouTube URL
 video_url = st.text_input("Enter the YouTube Video URL")
 
+# Dropdown menu for selecting video quality
+video_quality = st.selectbox(
+    "Select Video Quality",
+    ("Low", "High (1080p)")
+)
+
 # Download video button
 if st.button("Download Video", key="download_video_button", help="Click to download the YouTube video"):
     if video_url:
         try:
-            st.write("Downloading video...")
-            video_file = download_video_from_youtube(video_url)
+            st.write(f"Downloading {video_quality} quality video...")
+            video_file = download_video_from_youtube(video_url, video_quality)
             
-            # Provide download link for the video file
-            st.write("Download the video file:")
-            with open(video_file, "rb") as file:
-                btn = st.download_button(label="Download video file", 
-                                         data=file, 
-                                         file_name="downloaded_video.mp4", 
-                                         mime="video/mp4")
+            if video_file:
+                # Provide download link for the video file
+                st.write("Download the video file:")
+                with open(video_file, "rb") as file:
+                    btn = st.download_button(label="Download video file", 
+                                             data=file, 
+                                             file_name="downloaded_video.mp4", 
+                                             mime="video/mp4")
+            else:
+                st.write("Unable to download video at the selected quality. Please try a different quality option.")
         except Exception as e:
             st.write(f"An error occurred: {e}")
     else:
