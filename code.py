@@ -25,6 +25,11 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     elif quality == 'High (1080p)':
         video_stream = yt.streams.filter(file_extension='mp4', res="1080p").first()
         audio_stream = yt.streams.filter(only_audio=True).first()
+        
+        if not video_stream:
+            st.write("1080p not available, trying 720p...")
+            video_stream = yt.streams.filter(file_extension='mp4', res="720p").first()
+        
         if video_stream and audio_stream:
             video_stream.download(filename="video_only.mp4")
             audio_stream.download(filename="audio_only.mp4")
