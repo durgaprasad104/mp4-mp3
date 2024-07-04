@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 from pytube import YouTube
-import moviepy.editor as mp
 import os
 import time
 
@@ -30,11 +29,7 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
 
     if video_stream:
         downloaded_path = video_stream.download(filename=output_path)
-        # Convert to a more compatible format
-        clip = mp.VideoFileClip(downloaded_path)
-        compatible_path = output_path.replace(".mp4", "_compatible.mp4")
-        clip.write_videofile(compatible_path, codec="libx264")
-        return compatible_path
+        return downloaded_path
     else:
         raise ValueError(f"Unable to download video at the selected quality: {quality}")
 
