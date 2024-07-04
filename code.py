@@ -16,35 +16,23 @@ def download_audio_from_youtube(video_url, output_path="audio.mp4"):
 def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     yt = YouTube(video_url)
     
+    video_stream = None
     if quality == 'Low':
         video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').asc().first()
-        if video_stream:
-            video_stream.download(filename=output_path)
-        else:
-            raise ValueError(f"Unable to download video at the selected quality: {quality}")
     elif quality == 'High (1080p)':
         video_stream = yt.streams.filter(file_extension='mp4', res="1080p").first()
-        audio_stream = yt.streams.filter(only_audio=True).first()
-        
         if not video_stream:
             st.write("1080p not available, trying 720p...")
             video_stream = yt.streams.filter(file_extension='mp4', res="720p").first()
-        
-        if video_stream and audio_stream:
-            video_stream.download(filename="video_only.mp4")
-            audio_stream.download(filename="audio_only.mp4")
-            
-            # Combine video and audio using moviepy
-            video_clip = mp.VideoFileClip("video_only.mp4")
-            audio_clip = mp.AudioFileClip("audio_only.mp4")
-            final_clip = video_clip.set_audio(audio_clip)
-            final_clip.write_videofile(output_path, codec='libx264')
-            
-            os.remove("video_only.mp4")
-            os.remove("audio_only.mp4")
-        else:
-            raise ValueError(f"Unable to download video at the selected quality: {quality}")
-    
+        if not video_stream:
+            st.write("720p not available, trying highest available resolution...")
+            video_stream = yt.streams.filter(file_extension='mp4').order_by('resolution').desc().first()
+
+    if video_stream:
+        video_stream.download(filename=output_path)
+    else:
+        raise ValueError(f"Unable to download video at the selected quality: {quality}")
+
     return output_path
 
 # Streamlit configuration
