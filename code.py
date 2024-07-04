@@ -11,6 +11,13 @@ def download_audio_from_youtube(video_url, output_path="audio.mp4"):
     audio_stream.download(filename=output_path)
     return output_path
 
+# Function to download video from YouTube
+def download_video_from_youtube(video_url, output_path="video.mp4"):
+    yt = YouTube(video_url)
+    video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+    video_stream.download(filename=output_path)
+    return output_path
+
 # Function to transcribe audio using Whisper model
 def transcribe_audio(file):
     API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
@@ -65,7 +72,26 @@ st.header("YouTube Video Transcription 🎥")
 # Input field for YouTube URL
 video_url = st.text_input("Enter the YouTube Video URL")
 
-# Submit button
+# Download video button
+if st.button("Download Video", key="download_video_button", help="Click to download the YouTube video"):
+    if video_url:
+        try:
+            st.write("Downloading video...")
+            video_file = download_video_from_youtube(video_url)
+            
+            # Provide download link for the video file
+            st.write("Download the video file:")
+            with open(video_file, "rb") as file:
+                btn = st.download_button(label="Download video file", 
+                                         data=file, 
+                                         file_name="downloaded_video.mp4", 
+                                         mime="video/mp4")
+        except Exception as e:
+            st.write(f"An error occurred: {e}")
+    else:
+        st.write("Please enter a valid YouTube URL")
+
+# Submit button for transcription
 if st.button("Transcribe", key="transcribe_button", help="Click to transcribe the YouTube video"):
     if video_url:
         try:
