@@ -18,7 +18,7 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     video_stream = None
     if quality == 'Low':
         video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').asc().first()
-    elif quality == 'High (1080p)':
+    elif quality == 'High':
         video_stream = yt.streams.filter(file_extension='mp4', res="1080p").first()
         if not video_stream:
             st.write("1080p not available, trying 720p...")
@@ -39,105 +39,108 @@ st.set_page_config(page_title="YouTube Video Downloader",
                    layout='centered',
                    initial_sidebar_state='expanded')
 
-# Sidebar configuration
-st.sidebar.title("About the App")
-st.sidebar.info(
-    """
-    This app allows you to download the audio or video of a YouTube video.
-    - Enter the YouTube video URL
-    - Download the audio or video
-    - If the high quality video cannot download
-    - You can download the low quality
-    - And click download video file or audio file
+# Ask for user's name
+user_name = st.text_input("Enter your name", help="Please enter your name to continue")
 
-    **Note:** The download process may take some time depending on the length of the video and server load.
-    """
-)
+# Check if user name is entered
+if user_name:
+    st.sidebar.title(f"Welcome {user_name}!")
+    st.sidebar.info(
+        """
+        This app allows you to download the audio or video of a YouTube video.
+        - Enter the YouTube video URL
+        - Download the audio or video
 
-st.sidebar.title("Contact")
-st.sidebar.info(
-    """
-    **Developed by DP**
-    """
-)
+        **Note:** The download process may take some time depending on the length of the video and server load.
+        """
+    )
 
-st.header("YouTube Video/Audio Downloader 🎥")
+    st.sidebar.title("Contact")
+    st.sidebar.info(
+        """
+        **Developed by DP**
+        """
+    )
 
-# Input field for YouTube URL
-video_url = st.text_input("Enter the YouTube Video URL")
+    st.header("YouTube Video/Audio Downloader 🎥")
 
-# Dropdown menu for selecting video quality
-video_quality = st.selectbox(
-    "Select Video Quality",
-    ("Low", "High")
-)
+    # Input field for YouTube URL
+    video_url = st.text_input("Enter the YouTube Video URL")
 
-# Download video button
-if st.button("Download Video", key="download_video_button", help="Click to download the YouTube video"):
-    if video_url:
-        try:
-            st.write(f"Downloading {video_quality} quality video...")
-            video_file = download_video_from_youtube(video_url, video_quality)
-            
-            if video_file:
-                # Provide download link for the video file
-                st.write("Download the video file:")
-                with open(video_file, "rb") as file:
-                    btn = st.download_button(label="Download video file", 
-                                             data=file, 
-                                             file_name="downloaded_video.mp4", 
-                                             mime="video/mp4")
-        except ValueError as ve:
-            st.write(str(ve))
-        except Exception as e:
-            st.write(f"An error occurred: {e}")
-    else:
-        st.write("Please enter a valid YouTube URL")
+    # Dropdown menu for selecting video quality
+    video_quality = st.selectbox(
+        "Select Video Quality",
+        ("Low", "High")
+    )
 
-# Download audio button
-if st.button("Download Audio", key="download_audio_button", help="Click to download the audio of the YouTube video"):
-    if video_url:
-        try:
-            st.write("Downloading audio...")
-            audio_file = download_audio_from_youtube(video_url)
-            
-            if audio_file:
-                # Provide download link for the audio file
-                st.write("Download the audio file:")
-                with open(audio_file, "rb") as file:
-                    btn = st.download_button(label="Download audio file", 
-                                             data=file, 
-                                             file_name="downloaded_audio.mp4", 
-                                             mime="audio/mp4")
-        except Exception as e:
-            st.write(f"An error occurred: {e}")
-    else:
-        st.write("Please enter a valid YouTube URL")
+    # Download video button
+    if st.button("Download Video", key="download_video_button", help="Click to download the YouTube video"):
+        if video_url:
+            try:
+                st.write(f"Downloading {video_quality} quality video...")
+                video_file = download_video_from_youtube(video_url, video_quality)
+                
+                if video_file:
+                    # Provide download link for the video file
+                    st.write("Download the video file:")
+                    with open(video_file, "rb") as file:
+                        btn = st.download_button(label="Download video file", 
+                                                data=file, 
+                                                file_name="downloaded_video.mp4", 
+                                                mime="video/mp4")
+            except ValueError as ve:
+                st.write(str(ve))
+            except Exception as e:
+                st.write(f"An error occurred: {e}")
+        else:
+            st.write("Please enter a valid YouTube URL")
 
-# Add CSS for styling buttons
-st.markdown("""
-    <style>
-    .stButton > button {
-        background: linear-gradient(45deg, #FF6F61, #FFB399, #FFD700, #32CD32, #87CEEB, #9370DB);
-        background-size: 600% 600%;
-        color: white;
-        padding: 14px 20px;
-        margin: 8px 0;
-        border: none;
-        cursor: pointer;
-        width: 100%;
-        opacity: 0.9;
-        transition: all 0.5s ease;
-        animation: gradient 5s ease infinite;
-    }
-    .stButton > button:hover {
-        opacity: 1;
-        transform: scale(1.05);
-    }
-    @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # Download audio button
+    if st.button("Download Audio", key="download_audio_button", help="Click to download the audio of the YouTube video"):
+        if video_url:
+            try:
+                st.write("Downloading audio...")
+                audio_file = download_audio_from_youtube(video_url)
+                
+                if audio_file:
+                    # Provide download link for the audio file
+                    st.write("Download the audio file:")
+                    with open(audio_file, "rb") as file:
+                        btn = st.download_button(label="Download audio file", 
+                                                data=file, 
+                                                file_name="downloaded_audio.mp4", 
+                                                mime="audio/mp4")
+            except Exception as e:
+                st.write(f"An error occurred: {e}")
+        else:
+            st.write("Please enter a valid YouTube URL")
+
+    # Add CSS for styling buttons
+    st.markdown("""
+        <style>
+        .stButton > button {
+            background: linear-gradient(45deg, #FF6F61, #FFB399, #FFD700, #32CD32, #87CEEB, #9370DB);
+            background-size: 600% 600%;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            opacity: 0.9;
+            transition: all 0.5s ease;
+            animation: gradient 5s ease infinite;
+        }
+        .stButton > button:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        </style>
+        """, unsafe_allow_html=True)
+else:
+    st.write("Please enter your name to proceed")
