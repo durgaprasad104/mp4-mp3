@@ -2,6 +2,7 @@ streamlit
  translate
  gtts
  requests
+moviepy
  Pillow
  SpeechRecognition
 google-Generativeai
