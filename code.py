@@ -17,8 +17,8 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     
     if quality == 'Low':
         video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').asc().first()
-    elif quality == 'High (1080p)':
-        video_stream = yt.streams.filter(progressive=True, file_extension='mp4', res="1080p").first()
+    elif quality == 'High (720p)':
+        video_stream = yt.streams.filter(progressive=True, file_extension='mp4', res="720p").first()
     
     if video_stream:
         video_stream.download(filename=output_path)
@@ -83,7 +83,7 @@ video_url = st.text_input("Enter the YouTube Video URL")
 # Dropdown menu for selecting video quality
 video_quality = st.selectbox(
     "Select Video Quality",
-    ("Low", "High (1080p)")
+    ("Low", "High (720p)")
 )
 
 # Download video button
