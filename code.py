@@ -61,7 +61,7 @@ st.sidebar.info(
     """
 )
 
-st.header("YouTube Video Downloader 🎥")
+st.header("YouTube Video/Audio Downloader 🎥")
 
 # Input field for YouTube URL
 video_url = st.text_input("Enter the YouTube Video URL")
@@ -69,7 +69,7 @@ video_url = st.text_input("Enter the YouTube Video URL")
 # Dropdown menu for selecting video quality
 video_quality = st.selectbox(
     "Select Video Quality",
-    ("Low", "High (1080p)")
+    ("Low", "High")
 )
 
 # Download video button
