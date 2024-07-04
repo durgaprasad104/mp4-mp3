@@ -46,6 +46,9 @@ st.sidebar.info(
     This app allows you to download the audio or video of a YouTube video.
     - Enter the YouTube video URL
     - Download the audio or video
+    - If the high quality video cannot download
+    - You can download the low quality
+    - And click download video file or audio file
 
     **Note:** The download process may take some time depending on the length of the video and server load.
     """
