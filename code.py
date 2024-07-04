@@ -24,7 +24,7 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
         video_stream.download(filename=output_path)
         return output_path
     else:
-        return None
+        raise ValueError(f"Unable to download video at the selected quality: {quality}")
 
 # Function to transcribe audio using Whisper model
 def transcribe_audio(file):
@@ -101,8 +101,8 @@ if st.button("Download Video", key="download_video_button", help="Click to downl
                                              data=file, 
                                              file_name="downloaded_video.mp4", 
                                              mime="video/mp4")
-            else:
-                st.write("Unable to download video at the selected quality. Please try a different quality option.")
+        except ValueError as ve:
+            st.write(str(ve))
         except Exception as e:
             st.write(f"An error occurred: {e}")
     else:
