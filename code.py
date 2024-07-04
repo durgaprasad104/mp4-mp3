@@ -18,6 +18,10 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     
     if quality == 'Low':
         video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').asc().first()
+        if video_stream:
+            video_stream.download(filename=output_path)
+        else:
+            raise ValueError(f"Unable to download video at the selected quality: {quality}")
     elif quality == 'High (1080p)':
         video_stream = yt.streams.filter(file_extension='mp4', res="1080p").first()
         audio_stream = yt.streams.filter(only_audio=True).first()
@@ -33,41 +37,13 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
             
             os.remove("video_only.mp4")
             os.remove("audio_only.mp4")
-            return output_path
         else:
             raise ValueError(f"Unable to download video at the selected quality: {quality}")
     
-    if video_stream:
-        video_stream.download(filename=output_path)
-        return output_path
-    else:
-        raise ValueError(f"Unable to download video at the selected quality: {quality}")
-
-# Function to transcribe audio using Whisper model
-def transcribe_audio(file):
-    API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
-    headers = {"Authorization": "Bearer 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"}
-    
-    with open(file, "rb") as f:
-        data = f.read()
-    
-    for _ in range(10):  # Retry up to 10 times
-        response = requests.post(API_URL, headers=headers, data=data)
-        result = response.json()
-        
-        if 'error' not in result:
-            return result
-        elif 'estimated_time' in result:
-            st.write(f"Model is loading, estimated time: {result['estimated_time']} seconds")
-            time.sleep(result['estimated_time'])  # Wait for the estimated time
-        else:
-            st.write("Unexpected error occurred:", result)
-            return result
-    
-    return {"error": "Failed to load model after multiple attempts"}
+    return output_path
 
 # Streamlit configuration
-st.set_page_config(page_title="YouTube Video Transcription",
+st.set_page_config(page_title="YouTube Video Downloader",
                    page_icon='🎥',
                    layout='centered',
                    initial_sidebar_state='expanded')
@@ -76,12 +52,11 @@ st.set_page_config(page_title="YouTube Video Transcription",
 st.sidebar.title("About the App")
 st.sidebar.info(
     """
-    This app allows you to transcribe the audio of a YouTube video using the Whisper model.
+    This app allows you to download the audio or video of a YouTube video.
     - Enter the YouTube video URL
-    - Download the audio
-    - Transcribe the audio to text
+    - Download the audio or video
 
-    **Note:** The transcription process may take some time depending on the length of the audio and server load.
+    **Note:** The download process may take some time depending on the length of the video and server load.
     """
 )
 
@@ -92,7 +67,7 @@ st.sidebar.info(
     """
 )
 
-st.header("YouTube Video Transcription 🎥")
+st.header("YouTube Video Downloader 🎥")
 
 # Input field for YouTube URL
 video_url = st.text_input("Enter the YouTube Video URL")
@@ -125,30 +100,21 @@ if st.button("Download Video", key="download_video_button", help="Click to downl
     else:
         st.write("Please enter a valid YouTube URL")
 
-# Submit button for transcription
-if st.button("Transcribe", key="transcribe_button", help="Click to transcribe the YouTube video"):
+# Download audio button
+if st.button("Download Audio", key="download_audio_button", help="Click to download the audio of the YouTube video"):
     if video_url:
         try:
             st.write("Downloading audio...")
             audio_file = download_audio_from_youtube(video_url)
             
-            with st.spinner("Transcribing audio..."):
-                transcription_result = transcribe_audio(audio_file)
-            
-            if 'text' in transcription_result:
-                st.write("Transcription:")
-                st.write(transcription_result['text'])
-            else:
-                st.write("Error in transcription:")
-                st.write(transcription_result)
-            
-            # Provide download link for the audio file
-            st.write("Download the audio file:")
-            with open(audio_file, "rb") as file:
-                btn = st.download_button(label="Download audio file", 
-                                         data=file, 
-                                         file_name="transcribed_audio.mp4", 
-                                         mime="audio/mp4")
+            if audio_file:
+                # Provide download link for the audio file
+                st.write("Download the audio file:")
+                with open(audio_file, "rb") as file:
+                    btn = st.download_button(label="Download audio file", 
+                                             data=file, 
+                                             file_name="downloaded_audio.mp4", 
+                                             mime="audio/mp4")
         except Exception as e:
             st.write(f"An error occurred: {e}")
     else:
