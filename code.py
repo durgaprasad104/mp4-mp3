@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from pytube import YouTube
+import moviepy.editor as mp
 import os
 import time
 
@@ -17,8 +18,24 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     
     if quality == 'Low':
         video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').asc().first()
-    elif quality == 'High (720p)':
-        video_stream = yt.streams.filter(progressive=True, file_extension='mp4', res="720p").first()
+    elif quality == 'High (1080p)':
+        video_stream = yt.streams.filter(file_extension='mp4', res="1080p").first()
+        audio_stream = yt.streams.filter(only_audio=True).first()
+        if video_stream and audio_stream:
+            video_stream.download(filename="video_only.mp4")
+            audio_stream.download(filename="audio_only.mp4")
+            
+            # Combine video and audio using moviepy
+            video_clip = mp.VideoFileClip("video_only.mp4")
+            audio_clip = mp.AudioFileClip("audio_only.mp4")
+            final_clip = video_clip.set_audio(audio_clip)
+            final_clip.write_videofile(output_path, codec='libx264')
+            
+            os.remove("video_only.mp4")
+            os.remove("audio_only.mp4")
+            return output_path
+        else:
+            raise ValueError(f"Unable to download video at the selected quality: {quality}")
     
     if video_stream:
         video_stream.download(filename=output_path)
@@ -83,7 +100,7 @@ video_url = st.text_input("Enter the YouTube Video URL")
 # Dropdown menu for selecting video quality
 video_quality = st.selectbox(
     "Select Video Quality",
-    ("Low", "High (720p)")
+    ("Low", "High (1080p)")
 )
 
 # Download video button
