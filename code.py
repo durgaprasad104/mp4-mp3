@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 from pytube import YouTube
-from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
+from moviepy.editor import VideoFileClip, AudioFileClip
 import os
 import time
 
@@ -9,8 +9,11 @@ import time
 def download_audio_from_youtube(video_url, output_path="audio.mp4"):
     yt = YouTube(video_url)
     audio_stream = yt.streams.filter(only_audio=True).first()
-    audio_stream.download(filename=output_path)
-    return output_path
+    if audio_stream:
+        audio_stream.download(filename=output_path)
+        return output_path
+    else:
+        raise ValueError("No audio stream found.")
 
 # Function to download video from YouTube and merge with audio if necessary
 def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
@@ -33,27 +36,29 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
             if not video_stream:
                 st.write("720p not available, trying highest available resolution...")
                 video_stream = yt.streams.filter(file_extension='mp4').order_by('resolution').desc().first()
-            
+
             if video_stream:
                 downloaded_video_path = video_stream.download(filename="video.mp4")
                 
                 # Download audio separately and combine
                 st.write("Downloading separate audio track...")
                 audio_stream = yt.streams.filter(only_audio=True).first()
-                downloaded_audio_path = audio_stream.download(filename="audio.mp4")
-                
-                st.write("Combining video and audio...")
-                video_clip = VideoFileClip(downloaded_video_path)
-                audio_clip = AudioFileClip(downloaded_audio_path)
-                final_clip = video_clip.set_audio(audio_clip)
-                final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
-                
-                # Cleanup
-                os.remove(downloaded_video_path)
-                os.remove(downloaded_audio_path)
-                
-                return output_path
-
+                if audio_stream:
+                    downloaded_audio_path = audio_stream.download(filename="audio.mp4")
+                    
+                    st.write("Combining video and audio...")
+                    video_clip = VideoFileClip(downloaded_video_path)
+                    audio_clip = AudioFileClip(downloaded_audio_path)
+                    final_clip = video_clip.set_audio(audio_clip)
+                    final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+                    
+                    # Cleanup
+                    os.remove(downloaded_video_path)
+                    os.remove(downloaded_audio_path)
+                    
+                    return output_path
+                else:
+                    raise ValueError("No audio stream found to combine with the video.")
     if video_stream:
         downloaded_path = video_stream.download(filename=output_path)
         return downloaded_path
@@ -68,7 +73,7 @@ def transcribe_audio(file):
     with open(file, "rb") as f:
         data = f.read()
     
-    for _ in range(10):  # Retry up to 10 times
+    for _ in range 10:  # Retry up to 10 times
         response = requests.post(API_URL, headers=headers, data=data)
         result = response.json()
         
