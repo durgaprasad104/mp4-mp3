@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 from pytube import YouTube
-from moviepy.editor import VideoFileClip, AudioFileClip
 import os
 import time
 
@@ -9,27 +8,24 @@ import time
 def download_audio_from_youtube(video_url, output_path="audio.mp4"):
     yt = YouTube(video_url)
     audio_stream = yt.streams.filter(only_audio=True).first()
-    if audio_stream:
-        audio_stream.download(filename=output_path)
-        return output_path
-    else:
-        raise ValueError("No audio stream found.")
+    audio_stream.download(filename=output_path)
+    return output_path
 
-# Function to download video from YouTube and merge with audio if necessary
+# Function to download video from YouTube and convert to compatible format
 def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     yt = YouTube(video_url)
     
     video_stream = None
     if quality == 'Low':
         video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').asc().first()
-    elif quality == 'High (HD)':
-        video_stream = yt.streams.filter(progressive=True, file_extension='mp4', res="1080p").first()
+    elif quality == 'High (1080p)':
+        video_stream = yt.streams.filter(file_extension='mp4', res="1080p").first()
         if not video_stream:
             st.write("1080p not available, trying 720p...")
-            video_stream = yt.streams.filter(progressive=True, file_extension='mp4', res="720p").first()
+            video_stream = yt.streams.filter(file_extension='mp4', res="720p").first()
         if not video_stream:
-            st.write("720p not available, trying highest available resolution with audio...")
-            video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+            st.write("720p not available, trying highest available resolution...")
+            video_stream = yt.streams.filter(file_extension='mp4').order_by('resolution').desc().first()
 
     if video_stream:
         downloaded_path = video_stream.download(filename=output_path)
@@ -101,7 +97,7 @@ video_url = st.text_input("Enter the YouTube Video URL")
 # Dropdown menu for selecting video quality
 video_quality = st.selectbox(
     "Select Video Quality",
-    ("Low", "High (HD)")
+    ("Low", "High (1080p)")
 )
 
 # Download video button
