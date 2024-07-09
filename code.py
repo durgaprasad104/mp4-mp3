@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from pytube import YouTube
+from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
 import os
 import time
 
@@ -11,7 +12,7 @@ def download_audio_from_youtube(video_url, output_path="audio.mp4"):
     audio_stream.download(filename=output_path)
     return output_path
 
-# Function to download video from YouTube and convert to compatible format
+# Function to download video from YouTube and merge with audio if necessary
 def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     yt = YouTube(video_url)
     
@@ -28,8 +29,27 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
             video_stream = yt.streams.filter(file_extension='mp4').order_by('resolution').desc().first()
 
     if video_stream:
-        downloaded_path = video_stream.download(filename=output_path)
-        return downloaded_path
+        downloaded_video_path = video_stream.download(filename="video.mp4")
+        
+        # If the video stream does not contain audio, download audio separately and combine
+        if not video_stream.includes_audio_track:
+            st.write("Downloading separate audio track...")
+            audio_stream = yt.streams.filter(only_audio=True).first()
+            downloaded_audio_path = audio_stream.download(filename="audio.mp4")
+            
+            st.write("Combining video and audio...")
+            video_clip = VideoFileClip(downloaded_video_path)
+            audio_clip = AudioFileClip(downloaded_audio_path)
+            final_clip = video_clip.set_audio(audio_clip)
+            final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+            
+            # Cleanup
+            os.remove(downloaded_video_path)
+            os.remove(downloaded_audio_path)
+        else:
+            os.rename(downloaded_video_path, output_path)
+            
+        return output_path
     else:
         raise ValueError(f"Unable to download video at the selected quality: {quality}")
 
