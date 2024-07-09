@@ -73,7 +73,7 @@ def transcribe_audio(file):
     with open(file, "rb") as f:
         data = f.read()
     
-    for _ in range 10:  # Retry up to 10 times
+    for _ in range(10):  # Retry up to 10 times
         response = requests.post(API_URL, headers=headers, data=data)
         result = response.json()
         
