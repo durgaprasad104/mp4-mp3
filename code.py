@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from pytube import YouTube
+from moviepy.editor import VideoFileClip, AudioFileClip
 import os
 import time
 
@@ -39,35 +40,23 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
 # Function to transcribe audio using Whisper model
 def transcribe_audio(file):
     API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v2"
-    headers = {"Authorization": "Bearer your_api_key_here"}
+    headers = {"Authorization": "Bearer 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"}
     
     with open(file, "rb") as f:
         data = f.read()
     
     for _ in range(10):  # Retry up to 10 times
-        try:
-            response = requests.post(API_URL, headers=headers, data=data)
-            response.raise_for_status()  # Raise exception for HTTP errors (4xx, 5xx)
-            result = response.json()
-            
-            if 'error' not in result:
-                return result
-            elif 'estimated_time' in result:
-                st.write(f"Model is loading, estimated time: {result['estimated_time']} seconds")
-                time.sleep(result['estimated_time'])  # Wait for the estimated time
-            else:
-                st.write("Unexpected error occurred:", result)
-                return result
+        response = requests.post(API_URL, headers=headers, data=data)
+        result = response.json()
         
-        except requests.exceptions.HTTPError as http_err:
-            st.write(f"HTTP error occurred: {http_err}")
-            time.sleep(5)  # Wait before retrying
-        except requests.exceptions.RequestException as req_err:
-            st.write(f"Request error occurred: {req_err}")
-            time.sleep(5)  # Wait before retrying
-        except Exception as e:
-            st.write(f"An error occurred: {e}")
-            time.sleep(5)  # Wait before retrying
+        if 'error' not in result:
+            return result
+        elif 'estimated_time' in result:
+            st.write(f"Model is loading, estimated time: {result['estimated_time']} seconds")
+            time.sleep(result['estimated_time'])  # Wait for the estimated time
+        else:
+            st.write("Unexpected error occurred:", result)
+            return result
     
     return {"error": "Failed to load model after multiple attempts"}
 
@@ -93,14 +82,14 @@ st.sidebar.info(
     - Download the audio or video
     - Transcribe the audio to text
 
-    **Note:** The download and transcription processes may take some time depending on the length of the video and server load.
+    *Note:* The download and transcription processes may take some time depending on the length of the video and server load.
     """
 )
 
 st.sidebar.title("Contact")
 st.sidebar.info(
     """
-    **Developed by DP**
+    *Developed by DP*
     """
 )
 
