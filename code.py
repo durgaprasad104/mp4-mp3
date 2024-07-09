@@ -19,37 +19,44 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
     video_stream = None
     if quality == 'Low':
         video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').asc().first()
-    elif quality == 'High (1080p)':
-        video_stream = yt.streams.filter(file_extension='mp4', res="1080p").first()
+    elif quality == 'High (HD)':
+        # Try downloading high quality with audio first
+        video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+        
+        # If not available, try downloading separate video and audio streams
         if not video_stream:
-            st.write("1080p not available, trying 720p...")
-            video_stream = yt.streams.filter(file_extension='mp4', res="720p").first()
-        if not video_stream:
-            st.write("720p not available, trying highest available resolution...")
-            video_stream = yt.streams.filter(file_extension='mp4').order_by('resolution').desc().first()
+            st.write("Highest resolution with audio not available, trying separate video and audio streams...")
+            video_stream = yt.streams.filter(file_extension='mp4', res="1080p").first()
+            if not video_stream:
+                st.write("1080p not available, trying 720p...")
+                video_stream = yt.streams.filter(file_extension='mp4', res="720p").first()
+            if not video_stream:
+                st.write("720p not available, trying highest available resolution...")
+                video_stream = yt.streams.filter(file_extension='mp4').order_by('resolution').desc().first()
+            
+            if video_stream:
+                downloaded_video_path = video_stream.download(filename="video.mp4")
+                
+                # Download audio separately and combine
+                st.write("Downloading separate audio track...")
+                audio_stream = yt.streams.filter(only_audio=True).first()
+                downloaded_audio_path = audio_stream.download(filename="audio.mp4")
+                
+                st.write("Combining video and audio...")
+                video_clip = VideoFileClip(downloaded_video_path)
+                audio_clip = AudioFileClip(downloaded_audio_path)
+                final_clip = video_clip.set_audio(audio_clip)
+                final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+                
+                # Cleanup
+                os.remove(downloaded_video_path)
+                os.remove(downloaded_audio_path)
+                
+                return output_path
 
     if video_stream:
-        downloaded_video_path = video_stream.download(filename="video.mp4")
-        
-        # If the video stream does not contain audio, download audio separately and combine
-        if not video_stream.includes_audio_track:
-            st.write("Downloading separate audio track...")
-            audio_stream = yt.streams.filter(only_audio=True).first()
-            downloaded_audio_path = audio_stream.download(filename="audio.mp4")
-            
-            st.write("Combining video and audio...")
-            video_clip = VideoFileClip(downloaded_video_path)
-            audio_clip = AudioFileClip(downloaded_audio_path)
-            final_clip = video_clip.set_audio(audio_clip)
-            final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
-            
-            # Cleanup
-            os.remove(downloaded_video_path)
-            os.remove(downloaded_audio_path)
-        else:
-            os.rename(downloaded_video_path, output_path)
-            
-        return output_path
+        downloaded_path = video_stream.download(filename=output_path)
+        return downloaded_path
     else:
         raise ValueError(f"Unable to download video at the selected quality: {quality}")
 
@@ -117,7 +124,7 @@ video_url = st.text_input("Enter the YouTube Video URL")
 # Dropdown menu for selecting video quality
 video_quality = st.selectbox(
     "Select Video Quality",
-    ("Low", "High (1080p)")
+    ("Low", "High (HD)")
 )
 
 # Download video button
