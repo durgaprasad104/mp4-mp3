@@ -15,5 +15,5 @@ streamlit
 langchain_community
 huggingface_hub
 pytube
-pip install --upgrade pytube
+upgrade pytube
 
