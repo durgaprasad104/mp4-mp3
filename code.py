@@ -41,11 +41,9 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
 def transcribe_audio(file):
    API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
    headers = {"Authorization": "Bearer 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"}
-    
-   with open(file, "rb") as f:
+    with open(file, "rb") as f:
         data = f.read()
-    
-    for _ in range(10):  # Retry up to 10 times
+       for _ in range(10):  # Retry up to 10 times
         response = requests.post(API_URL, headers=headers, data=data)
         result = response.json()
         
