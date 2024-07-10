@@ -42,7 +42,7 @@ def transcribe_audio(file):
    API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
    headers = {"Authorization": "Bearer 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"}
     
-    with open(file, "rb") as f:
+   with open(file, "rb") as f:
         data = f.read()
     
     for _ in range(10):  # Retry up to 10 times
