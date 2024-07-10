@@ -39,8 +39,8 @@ def download_video_from_youtube(video_url, quality, output_path="video.mp4"):
 
 # Function to transcribe audio using Whisper model
 def transcribe_audio(file):
-    API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v2"
-    headers = {"Authorization": "Bearer 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"}
+   API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
+headers = {"Authorization": "Bearer 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"}
     
     with open(file, "rb") as f:
         data = f.read()
