@@ -15,5 +15,4 @@ streamlit
 langchain_community
 huggingface_hub
 pytube
-upgrade pytube
 
