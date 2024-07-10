@@ -1,4 +1,3 @@
-pip freeze
 streamlit
  translate
  gtts
